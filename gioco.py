@@ -1,28 +1,37 @@
 import arcade
 
+WINDOW_WIDTH = 1280
+WINDOW_HEIGHT = 720
+WINDOW_TITLE = "Platformer"
+
 class mywindow(arcade.Window):
-    def __init__(self, larghezza, altezza, titolo):
+    def __init__(self):
+        super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
+
+        self.background_color = arcade.csscolor.CORNFLOWER_BLUE
+
         self.lista_pilota = arcade.SpriteList()
         #self.sfondo = arcade.load_texture("")
         self.jump_pressed = False
         self.left_pressed = False
         self.right_pressed = False
-        
+        self.pilota = arcade.load_texture("./immagini/pilota1.png")
+        self.player_sprite = arcade.Sprite(self.pilota)
+        self.player_sprite.scale = 0.5
+        self.player_sprite.center_x = 64
+        self.player_sprite.center_y = 128
+
         self.velocita = 4
 
         self.setup()
     
     def setup(self):
-        self.pilota = arcade.Sprite("gioco_v1/immagini/pilota.png")
-        self.pilota.center_x = 20
-        self.pilota.center_y = 20
-        self.pilota.scale = 0.5
-        self.lista_pilota.append(self.pilota)
+        pass
     
     def on_draw(self):
         self.clear()
         #arcade.draw.draw_texture_rect(self.sfondo, arcade.types.Viewport(0,0,600,600))
-        self.lista_pilota.draw()
+        arcade.draw_sprite(self.player_sprite)
 
     def on_update(self, delta_time):
         # Calcola movimento in base ai tasti premuti
@@ -54,7 +63,8 @@ class mywindow(arcade.Window):
             self.right_pressed = False
 
 def main():
-    gioco = mywindow(600, 600, "bel gioco")
+    window = mywindow()
+    window.setup()
     arcade.run()
 
 if __name__ == "__main__":
