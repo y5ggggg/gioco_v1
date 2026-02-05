@@ -5,6 +5,9 @@ WINDOW_HEIGHT = 720
 WINDOW_TITLE = "Platformer"
 
 TILE_SCALING = 0.5
+PLAYER_MOVEMENT_SPEED = 5
+GRAVITY = 1
+PLAYER_JUMP_SPEED = 20
 
 class mywindow(arcade.Window):
     def __init__(self):
@@ -14,9 +17,6 @@ class mywindow(arcade.Window):
 
         self.lista_pilota = arcade.SpriteList()
         self.sfondo = arcade.load_texture("./immagini/sfondo1.png")
-        self.jump_pressed = False
-        self.left_pressed = False
-        self.right_pressed = False
         self.pilota = arcade.load_texture("./immagini/pilota1.png")
         self.player_sprite = arcade.Sprite(self.pilota)
         self.player_list=arcade.SpriteList()
@@ -37,6 +37,10 @@ class mywindow(arcade.Window):
             wall.scale= 0.1211
             wall.position = coordinate
             self.wall_list.append(wall)
+        
+        self.physics_engine = arcade.PhysicsEnginePlatformer(
+            self.player_sprite, walls=self.wall_list, gravity_constant=GRAVITY
+        )
 
         self.velocita = 4
 
@@ -52,33 +56,25 @@ class mywindow(arcade.Window):
         self.wall_list.draw()
 
     def on_update(self, delta_time):
-        # Calcola movimento in base ai tasti premuti
-        change_x = 0
-        change_y = 0
+        self.physics_engine.update()
         
-        if self.left_pressed:
-            change_x -= self.velocita
-        if self.right_pressed:
-            change_x += self.velocita
-        if self.jump_pressed:
-            change_y += 10
-
     def on_key_press(self, tasto, modificatori):
-        if tasto in (arcade.key.UP, arcade.key.SPACE):
-            self.jump_pressed = True
-        elif tasto in (arcade.key.RIGHT, arcade.key.D):
-            self.right_pressed = True
+        if tasto == arcade.key.UP or tasto == arcade.key.W:
+            if self.physics_engine.can_jump():
+                self.player_sprite.change_y = PLAYER_JUMP_SPEED
+        if tasto == arcade.key.LEFT or tasto == arcade.key.A:
+            self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
+        elif tasto == arcade.key.RIGHT or tasto == arcade.key.D:
+            self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
 
     def on_key_release(self, tasto, modificatori):
         """Gestisce il rilascio dei tasti"""
-        if tasto in (arcade.key.UP, arcade.key.W):
-            self.up_pressed = False
-        elif tasto in (arcade.key.DOWN, arcade.key.S):
-            self.down_pressed = False
-        elif tasto in (arcade.key.LEFT, arcade.key.A):
-            self.left_pressed = False
-        elif tasto in (arcade.key.RIGHT, arcade.key.D):
-            self.right_pressed = False
+        
+        if tasto == arcade.key.LEFT or tasto == arcade.key.A:
+            self.player_sprite.change_x = 0
+        elif tasto == arcade.key.RIGHT or tasto == arcade.key.D:
+            self.player_sprite.change_x = 0
+        
 
 def main():
     window = mywindow()
