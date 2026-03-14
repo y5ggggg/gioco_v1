@@ -1,10 +1,12 @@
 import arcade
 import random
+import gameview
+import arcade.future.background as background
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 WINDOW_TITLE = "Platformer"
-
+CAMERA_SPEED = 0.1
 PLAYER_SCALE = 0.5
 TILE_SCALING = 0.5
 COIN_SCALING = 0.12
@@ -70,21 +72,19 @@ PLAYER_JUMP_SPEED = 20
 class mywindow(arcade.Window):
     def __init__(self):
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
-
-        self.background_color = arcade.csscolor.CORNFLOWER_BLUE
+        self.gameview = gameview.GameView()
         self.pilota = None
         self.player_sprite = None
         self.player_list = None
-
         self.wall_list = None
-        self.camera = None
         self.coin_list = None
         self.gui_camera = None
         self.score = 0
         self.score_text = None
         self.scene = None
         self.tile_map = None
-
+        self.camera = arcade.Camera2D()
+        
         
         #self.collect_coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
         #self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
@@ -93,6 +93,7 @@ class mywindow(arcade.Window):
         self.pilota = arcade.load_texture("./pilota/pilota1.png")
         
         self.setup()
+        self.gameview.pan_camera_to_player()
     
     def setup(self):
         '''
@@ -110,8 +111,8 @@ class mywindow(arcade.Window):
 
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
         '''
-        self.scene= arcade.Scene()
-        self.player_sprite = arcade.Sprite(self.pilota)
+        self.scene = arcade.Scene()
+        self.player_sprite = self.gameview.player_sprite
         self.player_list=arcade.SpriteList()
         self.player_sprite.scale = 0.5
         self.player_sprite.center_x = 64
@@ -128,41 +129,48 @@ class mywindow(arcade.Window):
 
 
         coordinate_list = [[512, 96], [256, 96], [768, 96]]
-        for coordinate in coordinate_list:
+        for coordinate in range(128, 10000, 256):
             wall = arcade.Sprite("./immagini/tiles/muro.png", scale=TILE_SCALING)
             wall.scale= 0.1211
-            wall.position = coordinate
+            #wall.position = coordinate
+            wall.center_x = random.randint(10, 9800)
+            wall.center_y = 96
             self.scene.add_sprite("Walls", wall)
         
         for x in range(128, 10000, 256):
             coin = arcade.Sprite("./immagini/item.png", scale=COIN_SCALING)
-            coin.center_x = random.randint(10, 9600)
+            coin.center_x = random.randint(10, 9800)
             coin.center_y = random.randint(96, 256)
             self.scene.add_sprite("Coins", coin)
+            #39 coins totali
         
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.player_sprite, walls=self.scene["Walls"], gravity_constant=GRAVITY
         )
-        self.camera = arcade.Camera2D()
         self.velocita = 4
 
-        self.gui_camera = arcade.Camera2D()
-        self.score = 0
-        self.score_text = arcade.Text(f"Score: {self.score}", x = 0, y = 5)
         
+        self.score = 0
+        self.score_text = arcade.Text(f"Score: {self.score}", x = 0, y = 5, color = arcade.csscolor.BLACK, font_size = 20)
     
     def on_draw(self):
         self.clear()
-        self.camera.use()
-        
-        arcade.draw.draw_texture_rect(self.sfondo, arcade.types.Viewport(0,0,WINDOW_WIDTH,WINDOW_HEIGHT))
+        self.gameview.camera.use()
+        bg = self.gameview.backgrounds
+
+        # Sposta i layer simulando la profondità
+        bg.offset = self.gameview.camera.bottom_left
+        # Segue la camera per simulare un "mondo infinito"
+        bg.pos = self.gameview.camera.bottom_left
+
+        bg.draw()
         self.scene.draw()
-        self.gui_camera.use()
+        
         self.score_text.draw()
         
 
-    def on_update(self, delta_time):
-        self.camera.position = self.player_sprite.position
+    def on_update(self, delta_time: float):
+        self.gameview.on_update(delta_time)
         self.physics_engine.update()
         coin_hit_list = arcade.check_for_collision_with_list(
             self.player_sprite, self.scene["Coins"]
@@ -173,17 +181,19 @@ class mywindow(arcade.Window):
             #arcade.play_sound(self.collect_coin_sound)
             self.score += 75
             self.score_text.text = f"Score: {self.score}"
+        
 
     def on_key_press(self, tasto, modificatori):
         if tasto == arcade.key.ESCAPE:
             self.setup()
-        if tasto == arcade.key.UP or tasto == arcade.key.W:
+        if tasto == arcade.key.UP or tasto == arcade.key.W or tasto == arcade.key.SPACE:
             if self.physics_engine.can_jump():
                 self.player_sprite.change_y = PLAYER_JUMP_SPEED
         if tasto == arcade.key.LEFT or tasto == arcade.key.A:
             self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
         elif tasto == arcade.key.RIGHT or tasto == arcade.key.D:
             self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
+            
         '''if tasto == arcade.key.UP or tasto == arcade.key.W:
             if self.physics_engine.can_jump():
                 self.player_sprite.change_y = PLAYER_JUMP_SPEED
@@ -193,8 +203,11 @@ class mywindow(arcade.Window):
         
         if tasto == arcade.key.LEFT or tasto == arcade.key.A:
             self.player_sprite.change_x = 0
+            self.score_text.x = self.player_sprite.center_x
         elif tasto == arcade.key.RIGHT or tasto == arcade.key.D:
             self.player_sprite.change_x = 0
+            self.score_text.x = self.player_sprite.center_x
+            
         
 
 def main():
