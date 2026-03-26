@@ -12,7 +12,7 @@ TILE_SCALING = 0.5
 COIN_SCALING = 0.12
 PLAYER_MOVEMENT_SPEED = 5
 GRAVITY = 1
-PLAYER_JUMP_SPEED = 20
+PLAYER_JUMP_SPEED = 25
 
 # ---------------- PLAYER ----------------
 '''class Player(arcade.Sprite):
@@ -80,11 +80,14 @@ class mywindow(arcade.View):
         self.wall_list = None
         self.coin_list = None
         self.gui_camera = None
+        self.elapsed_time = 0.0
         self.score = 0
+        self.timer_text = None
         self.score_text = None
         self.scene = None
         self.tile_map = None
-        self.win= None
+        self.win = None
+        self.andata = True
         self.movement_left = PLAYER_MOVEMENT_SPEED
         self.movement_right = PLAYER_MOVEMENT_SPEED
         self.jump = PLAYER_JUMP_SPEED
@@ -134,8 +137,14 @@ class mywindow(arcade.View):
             wall.center_y = 32
             self.scene.add_sprite("Walls", wall)
 
+        for x in range(500, 9200, 500):
+            wall = arcade.Sprite("./immagini/tiles/terreno_alto.png", scale=TILE_SCALING)
+            wall.center_x = random.randint(500, 8800)
+            wall.center_y = 300
+            self.scene.add_sprite("Walls", wall)
 
-        for x in range(128, 9200, 256):
+
+        for x in range(128, 9200, 750):
             wall = arcade.Sprite("./immagini/tiles/muro.png", scale=TILE_SCALING)
             wall.scale= 0.1211
             #wall.position = coordinate
@@ -149,16 +158,16 @@ class mywindow(arcade.View):
             walls.position = coordinate
             self.scene.add_sprite("Walls", walls)
         
-        for x in range(128, 9600, 256):
+        for x in range(128, 9600, 700):
             coin = arcade.Sprite("./immagini/item.png", scale=COIN_SCALING)
             coin.center_x = random.randint(300, 9100)
-            coin.center_y = random.randint(96, 256)
+            coin.center_y = random.randint(96, 500)
             self.scene.add_sprite("Coins", coin)
             #38 coins totali
 
-        for x in range(9900, 9901):
+        for x in range(11000, 11001):
             bandiera = arcade.Sprite("./immagini/tiles/bandiera.png", scale=0.5)
-            bandiera.center_x = 9900
+            bandiera.center_x = 11000
             bandiera.center_y = 270
             self.scene.add_sprite("Bandiera", bandiera)
 
@@ -176,12 +185,11 @@ class mywindow(arcade.View):
         )
         self.velocita = 4
 
-        
         self.score = 0
-        #self.time_text = arcade.Text(f"Time: {self.time}", x=300, y=1100, color = arcade.csscolor.BLACK, font_size = 30)
-        
+        self.elapsed_time = 0.0
         self.score_text = arcade.Text(f"Score: {self.score}", x=0, y=5, anchor_x="center", color = arcade.csscolor.BLACK, font_size = 30)
-        
+        self.timer_text = arcade.Text(f"Time: 00:00.000", x=350, y=650, color = arcade.csscolor.BLACK, font_size = 20)
+
     def on_draw(self):
         self.window.clear()
         self.gameview.camera.use()
@@ -196,6 +204,7 @@ class mywindow(arcade.View):
         self.scene.draw()
         
         self.score_text.draw()
+        self.timer_text.draw()
         if self.win!= None:
             self.win.draw()
     def on_update(self, delta_time: float):
@@ -230,17 +239,29 @@ class mywindow(arcade.View):
             self.vettura_sprite, self.scene["Bandiera"]
         )
         for bandiera in bandiera_hit_list:
+            self.andata = False
             self.win = arcade.Text("HAI VINTO!", x=self.player_sprite.center_x, y=self.player_sprite.center_y +300, anchor_x="center", anchor_y="center", color = arcade.csscolor.PURPLE, font_size=200)
 
+        if self.andata:
+            self.elapsed_time += delta_time
+        minutes = int(self.elapsed_time) // 60
+        seconds = int(self.elapsed_time) % 60
+        millesimi = int((self.elapsed_time % 1) * 1000)
+        self.time = f"{minutes:02d}:{seconds:02d}.{millesimi:03d}"
+        self.timer_text.text = f"Time: {self.time}"
+        
 
-        #self.time += delta_time
-        #self.time_text.x = self.player_sprite.center_x + 300
+        self.timer_text.x = self.player_sprite.center_x + 350
         self.score_text.x = self.player_sprite.center_x
         
         
 
     def on_key_press(self, tasto, modificatori):
+        import pause
         if tasto == arcade.key.ESCAPE:
+            pause_view = pause.PauseView(self)
+            self.window.show_view(pause_view)
+        if tasto == arcade.key.R:
             self.setup()
             self.jump=PLAYER_JUMP_SPEED
             self.movement_left=PLAYER_MOVEMENT_SPEED

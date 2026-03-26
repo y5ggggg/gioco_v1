@@ -3,7 +3,7 @@ import menu
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
-WINDOW_TITLE = "Platformer"
+WINDOW_TITLE = "Aiuta il pilota"
 
 
 class MyGame(arcade.Window):
