@@ -88,6 +88,8 @@ class mywindow(arcade.View):
         self.tile_map = None
         self.win = None
         self.andata = True
+        self.era_in_aria = False
+        self.tempo_crouch = 0.0
         self.movement_left = PLAYER_MOVEMENT_SPEED
         self.movement_right = PLAYER_MOVEMENT_SPEED
         self.jump = PLAYER_JUMP_SPEED
@@ -152,7 +154,7 @@ class mywindow(arcade.View):
             wall.center_y = 96
             self.scene.add_sprite("Walls", wall)
 
-        coordinate_list = [[-100, 165], [12000, 165], [-100, 96], [12000, 96], [-100, 234], [12000, 234], [-100, 303], [12000, 303]]
+        coordinate_list = [[-100, 165], [12000, 165], [-100, 96], [12000, 96], [-100, 234], [12000, 234], [-100, 303], [12000, 303], [-100, 372], [12000, 372]]
         for coordinate in coordinate_list:
             walls = arcade.Sprite("./immagini/tiles/muro.png", scale=0.1211)
             walls.position = coordinate
@@ -161,9 +163,9 @@ class mywindow(arcade.View):
         for x in range(128, 9600, 700):
             coin = arcade.Sprite("./immagini/item.png", scale=COIN_SCALING)
             coin.center_x = random.randint(300, 9100)
-            coin.center_y = random.randint(96, 500)
+            coin.center_y = random.randint(96, 490)
             self.scene.add_sprite("Coins", coin)
-            #38 coins totali
+            #14 coins totali
 
         for x in range(11000, 11001):
             bandiera = arcade.Sprite("./immagini/tiles/bandiera.png", scale=0.5)
@@ -189,6 +191,27 @@ class mywindow(arcade.View):
         self.elapsed_time = 0.0
         self.score_text = arcade.Text(f"Score: {self.score}", x=0, y=5, anchor_x="center", color = arcade.csscolor.BLACK, font_size = 30)
         self.timer_text = arcade.Text(f"Time: 00:00.000", x=350, y=650, color = arcade.csscolor.BLACK, font_size = 20)
+        self.pause_text = arcade.Text(f"Premi ESC per mettere in pausa", x=-600, y=650, color = arcade.csscolor.BLACK, font_size = 15)
+
+    def _aggiorna_animazione(self):
+        ps = self.player_sprite
+        on_ground = self.physics_engine.can_jump()
+
+        if self.era_in_aria and on_ground:
+            self.tempo_crouch = 0.4
+
+        self.era_in_aria = not on_ground
+
+        if self.win is not None:
+            ps.imposta_animazione("win")
+        elif not on_ground:
+            ps.imposta_animazione("jump")
+        elif self.tempo_crouch > 0:
+            ps.imposta_animazione("crouch")
+        elif ps.change_x != 0:
+            ps.imposta_animazione("run")
+        else:
+            ps.imposta_animazione("idle")
 
     def on_draw(self):
         self.window.clear()
@@ -205,6 +228,7 @@ class mywindow(arcade.View):
         
         self.score_text.draw()
         self.timer_text.draw()
+        self.pause_text.draw()
         if self.win!= None:
             self.win.draw()
     def on_update(self, delta_time: float):
@@ -253,19 +277,23 @@ class mywindow(arcade.View):
 
         self.timer_text.x = self.player_sprite.center_x + 350
         self.score_text.x = self.player_sprite.center_x
+        self.pause_text.x = self.player_sprite.center_x - 600
         
+        if self.player_sprite.change_x < 0: 
+            self.player_sprite.scale = (-0.5, 0.5)
+        elif self.player_sprite.change_x > 0:
+            self.player_sprite.scale = (0.5, 0.5)
         
+        if self.tempo_crouch > 0:
+            self.tempo_crouch -= delta_time
+
+        self._aggiorna_animazione()
 
     def on_key_press(self, tasto, modificatori):
         import pause
         if tasto == arcade.key.ESCAPE:
             pause_view = pause.PauseView(self)
             self.window.show_view(pause_view)
-        if tasto == arcade.key.R:
-            self.setup()
-            self.jump=PLAYER_JUMP_SPEED
-            self.movement_left=PLAYER_MOVEMENT_SPEED
-            self.movement_right=PLAYER_MOVEMENT_SPEED
         if tasto == arcade.key.UP or tasto == arcade.key.W or tasto == arcade.key.SPACE:
             if self.physics_engine.can_jump():
                 self.player_sprite.change_y = self.jump

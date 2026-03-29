@@ -1,6 +1,6 @@
 import arcade
 import arcade.future.background as background
-
+from animazione import SpriteAnimato
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -20,7 +20,7 @@ class GameView(arcade.View):
         self.backgrounds.add_from_file("./immagini/sfondo1.png",    size=bg_size, depth=10.0)
         self.backgrounds.add_from_file("./immagini/tiles/dietro.png",   size=(WINDOW_WIDTH, 578), depth=3.0)
         self.backgrounds.add_from_file("./immagini/tiles/tribuna.png",   size=(WINDOW_WIDTH, 292), depth=1.5)
-        self.player_sprite = arcade.Sprite("./pilota/pilota1.png", scale=0.5)
+        self.player_sprite = SpriteAnimato(scala=0.5)
         self.player_sprite.bottom = 128 # mette il giocatore in basso
         self.x_velocity = 0 # usata per la gestione del movimento, per spostare il giocatore
 
@@ -48,4 +48,5 @@ class GameView(arcade.View):
 
     def on_update(self, delta_time: float):
         self.player_sprite.center_x += self.x_velocity * delta_time
+        self.player_sprite.update_animation(delta_time)
         self.pan_camera_to_player()
