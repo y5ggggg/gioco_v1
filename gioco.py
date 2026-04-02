@@ -186,6 +186,7 @@ class mywindow(arcade.View):
         self.scene.draw()
         arcade.draw_texture_rect(self.life, arcade.LBWH(self.position_1, WINDOW_HEIGHT - 350, 781, 350))
         self.score_text.draw()
+        self.avviso.draw()
         self.timer_text.draw()
         self.pause_text.draw()
         self.conto_win.draw()
