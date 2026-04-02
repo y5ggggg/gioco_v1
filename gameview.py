@@ -2,8 +2,8 @@ import arcade
 import arcade.future.background as background
 from animazione import SpriteAnimato
 
-WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
+WINDOW_WIDTH = 1920
+WINDOW_HEIGHT = 1080
 CAMERA_SPEED = 0.1
 
 
@@ -37,6 +37,15 @@ class GameView(arcade.View):
 
         bg.draw()
         arcade.draw_sprite(self.player_sprite)
+
+    # def _clamp_player(self):
+    #     half = self.player_sprite.width // 2
+    #     if self.player_sprite.left < 0:
+    #         self.player_sprite.left = 0
+    #         self.player_sprite.change_x = 0
+    #     if self.player_sprite.right > 12000:
+    #         self.player_sprite.right = 12000
+    #         self.player_sprite.change_x = 0
 
     def pan_camera_to_player(self):
         # La camera segue il giocatore in modo "smooth" (lerp). Guarda l'altro blog sulla camera
