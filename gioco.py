@@ -217,7 +217,7 @@ class mywindow(arcade.View):
             self.player_sprite, self.scene["Vettura"]
         )
         for vettura in vettura_hit_list:
-            if self.score == 1050:
+            if self.score == 14:
                 self.scene["Vettura"].remove(vettura)
                 self.jump = 0
                 self.movement_left = 0
