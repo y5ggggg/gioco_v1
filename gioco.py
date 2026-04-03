@@ -43,6 +43,8 @@ class mywindow(arcade.View):
         self.jump = PLAYER_JUMP_SPEED
         self.camera = arcade.Camera2D()
         self.enemy_list = self.enemy.enemy_list
+        self.sfondo_vittoria = arcade.load_texture("./immagini/sfondo_vittoria.png")
+        self.sfondo_lose = arcade.load_texture("./immagini/sfondo_lose.png")
         self.vita_5 = arcade.load_texture("./immagini/tiles/vita_5.png")
         self.vita_4 = arcade.load_texture("./immagini/tiles/vita_4.png")
         self.vita_3 = arcade.load_texture("./immagini/tiles/vita_3.png")
@@ -56,9 +58,9 @@ class mywindow(arcade.View):
         #self.collect_coin_sound = arcade.load_sound(":resources:sounds/coin1.wav")
         #self.jump_sound = arcade.load_sound(":resources:sounds/jump1.wav")
         self.timer_text = arcade.Text(f"Time: 00:00.000", x=730, y=1000, color = arcade.csscolor.BLACK, font_size = 20)
-        self.timer_fine_livello_text = arcade.Text(f"Time: 00:00.000", x=500, y=800, color = arcade.csscolor.BLACK, font_name="Broadway BT", font_size = 30)
-        self.lose = arcade.Text("HAI PERSO!", x=0, y=WINDOW_HEIGHT // 2, anchor_x="center", anchor_y="center", color = arcade.csscolor.PURPLE, font_name="Broadway BT", font_size=200)
-        self.conto_win = arcade.Text(f"Ti mancano 5 livelli per vincere", x=0, y=800, anchor_x="center", anchor_y="center", color = arcade.csscolor.DARK_RED, font_name="Broadway BT", font_size=20)   
+        self.timer_fine_livello_text = arcade.Text(f"Time: 00:00.000", x=500, y=950, color = arcade.csscolor.BLACK, font_name="Broadway BT", font_size = 30)
+        self.lose = arcade.Text("HAI PERSO!", x=0, y=WINDOW_HEIGHT // 1.5, anchor_x="center", anchor_y="center", color = arcade.csscolor.RED, font_name="Broadway BT", font_size=200)
+        self.conto_win = arcade.Text(f"Ti mancano 3 livelli per vincere", x=0, y=800, anchor_x="center", anchor_y="center", color = arcade.csscolor.DARK_RED, font_name="Broadway BT", font_size=20)   
         self.setup()
         self.gameview.pan_camera_to_player()
 
@@ -122,7 +124,7 @@ class mywindow(arcade.View):
         for x in range(128, 9600, 700):
             coin = arcade.Sprite("./immagini/item.png", scale=COIN_SCALING)
             coin.center_x = random.randint(300, 9100)
-            coin.center_y = random.randint(96, 650)
+            coin.center_y = random.randint(96, 630)
             self.scene.add_sprite("Coins", coin)
             #14 coins totali
 
@@ -184,7 +186,6 @@ class mywindow(arcade.View):
 
         bg.draw()
         self.scene.draw()
-        arcade.draw_texture_rect(self.life, arcade.LBWH(self.position_1, WINDOW_HEIGHT - 350, 781, 350))
         self.score_text.draw()
         self.avviso.draw()
         self.timer_text.draw()
@@ -192,11 +193,14 @@ class mywindow(arcade.View):
         self.conto_win.draw()
         if self.loser:
             self.window.clear()
+            arcade.draw_texture_rect(self.sfondo_lose, arcade.LBWH(self.position_1-(WINDOW_WIDTH // 3)+60, 0, WINDOW_WIDTH, WINDOW_HEIGHT))
             self.lose.draw()
         if self.win!= None:
             self.window.clear()
+            arcade.draw_texture_rect(self.sfondo_vittoria, arcade.LBWH(self.position_1-(WINDOW_WIDTH // 3)+60, 0, WINDOW_WIDTH, WINDOW_HEIGHT))
             self.win.draw()
             self.timer_fine_livello_text.draw()
+        arcade.draw_texture_rect(self.life, arcade.LBWH(self.position_1, WINDOW_HEIGHT - 350, 781, 350))
     def on_update(self, delta_time: float):
         self.vettura_sprite.center_x -= self.velocita * delta_time
         self.gameview.on_update(delta_time)
@@ -254,11 +258,11 @@ class mywindow(arcade.View):
         for bandiera in bandiera_hit_list:
             self.win_rate += 1
             self.setup()
-            self.conto_win.text = f"Ti mancano {5 - self.win_rate} livelli per vincere"
+            self.conto_win.text = f"Ti mancano {3 - self.win_rate} livelli per vincere"
             self.jump = PLAYER_JUMP_SPEED
             self.movement_left = PLAYER_MOVEMENT_SPEED 
             self.movement_right = PLAYER_MOVEMENT_SPEED
-            if self.win_rate == 5:
+            if self.win_rate == 3:
                 self.andata = False
                 self.jump = 0
                 self.movement_left = 0 
@@ -268,7 +272,7 @@ class mywindow(arcade.View):
                 seconds = int(self.timer_fine_livello) % 60
                 millesimi = int((self.timer_fine_livello % 1) * 1000)
                 self.timer_fine_livello_text.text = f"Hai vinto in: {minutes:02d}:{seconds:02d}.{millesimi:03d}"
-                self.win = arcade.Text("HAI VINTO!", x=self.player_sprite.center_x, y=300, anchor_x="center", anchor_y="center", color = arcade.csscolor.PURPLE, font_name="Broadway BT", font_size=200)
+                self.win = arcade.Text("HAI VINTO!", x=self.player_sprite.center_x, y=WINDOW_HEIGHT // 5, anchor_x="center", anchor_y="center", color = arcade.csscolor.PURPLE, font_name="Broadway BT", font_size=200)
         
         if self.andata:
             self.elapsed_time += delta_time
