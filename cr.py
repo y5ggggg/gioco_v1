@@ -14,8 +14,8 @@ class MyGame(arcade.Window):
         # Formatta come MM:SS
         minutes = int(self.elapsed_time) // 60
         seconds = int(self.elapsed_time) % 60
-        timer_text = f"{minutes:02d}:{seconds:02d}"
-
+        millesimi = int((self.elapsed_time % 1) * 1000)
+        timer_text = f"{minutes:02d}:{seconds:02d}.{millesimi:03d}"
         arcade.draw_text(timer_text, 400, 550, arcade.color.WHITE, 36, anchor_x="center")
 
 game = MyGame()

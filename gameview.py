@@ -17,7 +17,7 @@ class GameView(arcade.View):
 
         bg_size = (WINDOW_WIDTH, WINDOW_HEIGHT)
 
-        self.backgrounds.add_from_file("./immagini/sfondo1.png",    size=bg_size, depth=10.0)
+        self.backgrounds.add_from_file("./immagini/sfondo1.png",    size=bg_size, depth=10.0, scale=1.9)
         self.backgrounds.add_from_file("./immagini/tiles/dietro.png",   size=(WINDOW_WIDTH, 578), depth=3.0)
         self.backgrounds.add_from_file("./immagini/tiles/tribuna.png",   size=(WINDOW_WIDTH, 292), depth=1.5)
         self.player_sprite = SpriteAnimato(scala=0.5)
